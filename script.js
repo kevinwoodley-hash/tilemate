@@ -14,6 +14,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const adhesiveBagsEl = document.getElementById('adhesive-bags');
     const totalGroutEl = document.getElementById('total-grout');
 
+    // Customer Elements
+    const customerToggle = document.getElementById('customer-toggle');
+    const customerContent = document.getElementById('customer-content');
+    const customerHeader = document.getElementById('customer-header');
+    const customerBadge = document.getElementById('customer-badge');
+    const customerNameInput = document.getElementById('customer-name');
+    const customerAddressInput = document.getElementById('customer-address');
+    const customerPhoneInput = document.getElementById('customer-phone');
+    const customerEmailInput = document.getElementById('customer-email');
+    const clearCustomerBtn = document.getElementById('clear-customer-btn');
+
+    // Share Elements
+    const shareWhatsAppBtn = document.getElementById('share-whatsapp');
+    const shareEmailBtn = document.getElementById('share-email');
+    const shareCopyBtn = document.getElementById('share-copy');
+    const copyFeedback = document.getElementById('copy-feedback');
+
     // Settings Elements
     const settingsPanel = document.getElementById('settings-panel');
     const settingsToggle = document.getElementById('settings-toggle');
@@ -44,6 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Initialization ---
     // Add one default room
     addRoom();
+
+    // Load customer details from localStorage
+    loadCustomerDetails();
+
+    // Initialize address autocomplete
+    initAddressAutocomplete();
 
     // --- Event Listeners ---
     addRoomBtn.addEventListener('click', addRoom);
@@ -130,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     calculateBtn.addEventListener('click', () => {
         updateTotals();
+        updateCustomerSummary();
         summaryFooter.classList.remove('hidden');
         // Scroll to bottom
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
@@ -159,6 +183,32 @@ document.addEventListener('DOMContentLoaded', () => {
     [trowelSelect, bagSizeInput, tileLenInput, tileWidInput, tileThickInput, jointWidInput].forEach(el => {
         el.addEventListener('input', updateConfig);
     });
+
+    // Customer Details Events
+    customerHeader.addEventListener('click', toggleCustomerSection);
+
+    [customerNameInput, customerAddressInput, customerPhoneInput, customerEmailInput].forEach(input => {
+        input.addEventListener('input', () => {
+            saveCustomerDetails();
+            updateCustomerBadge();
+        });
+    });
+
+    clearCustomerBtn.addEventListener('click', () => {
+        if (confirm('Clear all customer details?')) {
+            customerNameInput.value = '';
+            customerAddressInput.value = '';
+            customerPhoneInput.value = '';
+            customerEmailInput.value = '';
+            saveCustomerDetails();
+            updateCustomerBadge();
+        }
+    });
+
+    // Share Button Events
+    shareWhatsAppBtn.addEventListener('click', shareViaWhatsApp);
+    shareEmailBtn.addEventListener('click', shareViaEmail);
+    shareCopyBtn.addEventListener('click', copyToClipboard);
 
     // --- Functions ---
 
@@ -287,6 +337,334 @@ document.addEventListener('DOMContentLoaded', () => {
         tankEl.parentElement.style.display = totalTanking > 0 ? 'block' : 'none';
         tankEl.parentElement.querySelector('strong').textContent = totalTanking.toFixed(2) + ' m²';
         if (countTankEl) countTankEl.textContent = totalTanking > 0 ? `(${tankingCount} kits)` : '';
+    }
+
+    // --- Customer Details Functions ---
+
+    function toggleCustomerSection() {
+        customerContent.classList.toggle('collapsed');
+        customerToggle.classList.toggle('collapsed');
+    }
+
+    function saveCustomerDetails() {
+        const customerData = {
+            name: customerNameInput.value,
+            address: customerAddressInput.value,
+            phone: customerPhoneInput.value,
+            email: customerEmailInput.value
+        };
+        localStorage.setItem('tileMateCustomer', JSON.stringify(customerData));
+    }
+
+    function loadCustomerDetails() {
+        const saved = localStorage.getItem('tileMateCustomer');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                customerNameInput.value = data.name || '';
+                customerAddressInput.value = data.address || '';
+                customerPhoneInput.value = data.phone || '';
+                customerEmailInput.value = data.email || '';
+                updateCustomerBadge();
+            } catch (e) {
+                console.error('Failed to load customer details:', e);
+            }
+        }
+    }
+
+    function updateCustomerBadge() {
+        const hasData = customerNameInput.value || customerAddressInput.value ||
+            customerPhoneInput.value || customerEmailInput.value;
+        if (hasData) {
+            customerBadge.classList.remove('hidden');
+        } else {
+            customerBadge.classList.add('hidden');
+        }
+    }
+
+    function updateCustomerSummary() {
+        const customerSummary = document.getElementById('customer-summary');
+        const name = customerNameInput.value.trim();
+        const address = customerAddressInput.value.trim();
+        const phone = customerPhoneInput.value.trim();
+        const email = customerEmailInput.value.trim();
+
+        // Only show if at least one field is filled
+        if (name || address || phone || email) {
+            document.getElementById('customer-summary-name').textContent = name || 'Customer';
+            document.getElementById('customer-summary-address').textContent = address;
+            document.getElementById('customer-summary-phone').textContent = phone;
+            document.getElementById('customer-summary-email').textContent = email;
+            customerSummary.classList.remove('hidden');
+        } else {
+            customerSummary.classList.add('hidden');
+        }
+    }
+
+    // --- Share Functions ---
+
+    function generateQuoteText() {
+        const date = new Date().toLocaleDateString('en-GB');
+        const name = customerNameInput.value.trim() || 'Customer';
+        const address = customerAddressInput.value.trim();
+        const phone = customerPhoneInput.value.trim();
+        const email = customerEmailInput.value.trim();
+
+        // Get current totals
+        const totalArea = totalAreaEl.textContent;
+        const totalBoxes = document.getElementById('total-boxes').textContent;
+        const totalTilesArea = document.getElementById('total-tiles-area').textContent;
+        const adhesive = totalAdhesiveEl.textContent;
+        const adhesiveBags = adhesiveBagsEl.textContent;
+        const grout = totalGroutEl.textContent;
+
+        // Build quote text
+        let quote = `═══════════════════════════\n`;
+        quote += `   TILING QUOTE\n`;
+        quote += `═══════════════════════════\n\n`;
+
+        // Customer details
+        quote += `CUSTOMER: ${name}\n`;
+        if (address) quote += `ADDRESS: ${address}\n`;
+        if (phone) quote += `PHONE: ${phone}\n`;
+        if (email) quote += `EMAIL: ${email}\n`;
+        quote += `\n`;
+
+        // Room breakdown
+        const cards = document.querySelectorAll('.room-card');
+        if (cards.length > 0) {
+            quote += `ROOM BREAKDOWN:\n`;
+            quote += `───────────────────────────\n`;
+            cards.forEach((card, index) => {
+                const roomName = card.querySelector('.room-name-input').value || `Room ${index + 1}`;
+                const roomArea = card.querySelector('.room-area-val').textContent;
+                const roomType = card.querySelector('.type-radio:checked').value;
+                quote += `${index + 1}. ${roomName} (${roomType})\n`;
+                quote += `   Area: ${roomArea} m²\n`;
+
+                // List measurements
+                const rows = card.querySelectorAll('.area-row-wrapper');
+                rows.forEach((row, i) => {
+                    const len = row.querySelector('.length').value;
+                    const wid = row.querySelector('.width').value;
+                    if (len && wid) {
+                        quote += `   └ ${len}m × ${wid}m\n`;
+                    }
+                });
+                quote += `\n`;
+            });
+        }
+
+        // Totals
+        quote += `TOTAL AREA: ${totalArea}\n`;
+        quote += `\n`;
+
+        // Materials
+        quote += `MATERIALS REQUIRED:\n`;
+        quote += `───────────────────────────\n`;
+        quote += `✓ Tiles: ${totalBoxes}\n`;
+        quote += `  (${totalTilesArea})\n`;
+        quote += `✓ Adhesive: ${adhesive}\n`;
+        quote += `  ${adhesiveBags}\n`;
+        quote += `✓ Grout: ${grout}\n`;
+
+        // Substrates if any
+        const subSection = document.getElementById('substrates-summary');
+        if (!subSection.classList.contains('hidden')) {
+            quote += `\nSUBSTRATES:\n`;
+            const boardEl = document.getElementById('total-board');
+            const memEl = document.getElementById('total-membrane');
+            const tankEl = document.getElementById('total-tanking');
+
+            if (boardEl.parentElement.style.display !== 'none') {
+                const boardText = boardEl.parentElement.textContent.trim();
+                quote += `✓ ${boardText}\n`;
+            }
+            if (memEl.parentElement.style.display !== 'none') {
+                const memText = memEl.parentElement.textContent.trim();
+                quote += `✓ ${memText}\n`;
+            }
+            if (tankEl.parentElement.style.display !== 'none') {
+                const tankText = tankEl.parentElement.textContent.trim();
+                quote += `✓ ${tankText}\n`;
+            }
+        }
+
+        quote += `\n═══════════════════════════\n`;
+        quote += `Generated by TileMate\n`;
+        quote += `${date}\n`;
+        quote += `═══════════════════════════`;
+
+        return quote;
+    }
+
+    function shareViaWhatsApp() {
+        const quote = generateQuoteText();
+        const phone = customerPhoneInput.value.trim();
+
+        // Format phone number for WhatsApp (remove spaces and special chars)
+        const formattedPhone = phone.replace(/[^0-9+]/g, '');
+
+        // Create WhatsApp URL
+        let whatsappUrl = 'https://wa.me/';
+        if (formattedPhone) {
+            whatsappUrl += formattedPhone;
+        }
+        whatsappUrl += '?text=' + encodeURIComponent(quote);
+
+        // Open WhatsApp
+        window.open(whatsappUrl, '_blank');
+    }
+
+    function shareViaEmail() {
+        const quote = generateQuoteText();
+        const email = customerEmailInput.value.trim();
+        const name = customerNameInput.value.trim() || 'Customer';
+
+        const subject = `Tiling Quote for ${name}`;
+        const body = quote;
+
+        // Create mailto URL
+        let mailtoUrl = 'mailto:';
+        if (email) {
+            mailtoUrl += email;
+        }
+        mailtoUrl += '?subject=' + encodeURIComponent(subject);
+        mailtoUrl += '&body=' + encodeURIComponent(body);
+
+        // Open email client
+        window.location.href = mailtoUrl;
+    }
+
+    function copyToClipboard() {
+        const quote = generateQuoteText();
+
+        // Use modern clipboard API
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(quote).then(() => {
+                showCopyFeedback();
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                fallbackCopy(quote);
+            });
+        } else {
+            fallbackCopy(quote);
+        }
+    }
+
+    function fallbackCopy(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            showCopyFeedback();
+        } catch (err) {
+            console.error('Fallback copy failed:', err);
+            alert('Failed to copy to clipboard');
+        }
+        document.body.removeChild(textarea);
+    }
+
+    function showCopyFeedback() {
+        copyFeedback.classList.remove('hidden');
+        setTimeout(() => {
+            copyFeedback.classList.add('hidden');
+        }, 2000);
+    }
+
+    // --- Address Autocomplete Functions ---
+
+    let addressSearchTimeout;
+    const addressSuggestionsEl = document.getElementById('address-suggestions');
+
+    function initAddressAutocomplete() {
+        customerAddressInput.addEventListener('input', handleAddressInput);
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.address-autocomplete-wrapper')) {
+                addressSuggestionsEl.classList.add('hidden');
+            }
+        });
+    }
+
+    function handleAddressInput(e) {
+        const query = e.target.value.trim();
+
+        // Clear previous timeout
+        clearTimeout(addressSearchTimeout);
+
+        // Hide suggestions if query is too short
+        if (query.length < 3) {
+            addressSuggestionsEl.classList.add('hidden');
+            return;
+        }
+
+        // Debounce the search
+        addressSearchTimeout = setTimeout(() => {
+            searchAddress(query);
+        }, 500);
+    }
+
+    function searchAddress(query) {
+        // Use Nominatim API (OpenStreetMap)
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`;
+
+        fetch(url, {
+            headers: {
+                'User-Agent': 'TileMate App'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                displayAddressSuggestions(data);
+            })
+            .catch(error => {
+                console.error('Address search error:', error);
+                addressSuggestionsEl.classList.add('hidden');
+            });
+    }
+
+    function displayAddressSuggestions(results) {
+        if (!results || results.length === 0) {
+            addressSuggestionsEl.classList.add('hidden');
+            return;
+        }
+
+        // Clear previous suggestions
+        addressSuggestionsEl.innerHTML = '';
+
+        results.forEach(result => {
+            const item = document.createElement('div');
+            item.className = 'address-suggestion-item';
+
+            const mainText = result.display_name.split(',').slice(0, 2).join(',');
+            const subText = result.display_name.split(',').slice(2).join(',');
+
+            item.innerHTML = `
+                <div>${mainText}</div>
+                ${subText ? `<small>${subText}</small>` : ''}
+            `;
+
+            item.addEventListener('click', () => {
+                selectAddress(result.display_name);
+            });
+
+            addressSuggestionsEl.appendChild(item);
+        });
+
+        addressSuggestionsEl.classList.remove('hidden');
+    }
+
+    function selectAddress(address) {
+        customerAddressInput.value = address;
+        addressSuggestionsEl.classList.add('hidden');
+        saveCustomerDetails();
+        updateCustomerBadge();
     }
 
 });
