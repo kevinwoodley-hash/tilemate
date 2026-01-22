@@ -35,11 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsPanel = document.getElementById('settings-panel');
     const settingsToggle = document.getElementById('settings-toggle');
     const closeSettingsBtn = document.getElementById('close-settings');
-    const closeSettingsX = document.getElementById('close-settings-x');
 
     // Settings Inputs
+    const themeSelect = document.getElementById('theme-select');
     const trowelSelect = document.getElementById('trowel-size');
     const bagSizeInput = document.getElementById('adhesive-bag-size');
+    const boxAreaInput = document.getElementById('box-area');
+    const wastageInput = document.getElementById('wastage-percent');
     const tileLenInput = document.getElementById('tile-length');
     const tileWidInput = document.getElementById('tile-width');
     const tileThickInput = document.getElementById('tile-thickness');
@@ -167,7 +169,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleSettings = () => settingsPanel.classList.toggle('hidden');
     settingsToggle.addEventListener('click', toggleSettings);
     closeSettingsBtn.addEventListener('click', toggleSettings);
-    closeSettingsX.addEventListener('click', toggleSettings);
+
+    // Theme switching
+    if (themeSelect) {
+        // Load saved theme
+        const savedTheme = localStorage.getItem('tileMateTheme') || 'default';
+        themeSelect.value = savedTheme;
+        document.body.setAttribute('data-theme', savedTheme);
+
+        themeSelect.addEventListener('change', (e) => {
+            const theme = e.target.value;
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('tileMateTheme', theme);
+        });
+    }
 
     const updateConfig = () => {
         config.adhesiveRate = parseFloat(trowelSelect.value);
@@ -284,7 +299,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Total Area
         totalAreaEl.textContent = totalArea.toFixed(2) + ' m²';
 
-        // 2. Adhesive (Weight + Bags)
+        // 2. Tile Boxes (with wastage)
+        const boxArea = parseFloat(boxAreaInput.value) || 1.44;
+        const wastagePercent = parseFloat(wastageInput.value) || 10;
+        const wastageMultiplier = 1 + (wastagePercent / 100);
+        const tilesNeeded = totalArea * wastageMultiplier;
+        const boxesNeeded = Math.ceil(tilesNeeded / boxArea);
+
+        document.getElementById('total-boxes').textContent = boxesNeeded + ' Boxes';
+        document.getElementById('total-tiles-area').textContent = tilesNeeded.toFixed(2) + ' m²';
+        document.getElementById('box-count-detail').textContent = wastagePercent + '% waste';
+
+        // 3. Adhesive (Weight + Bags)
         const safetyMargin = 1.10;
         const totalAdhesiveKg = totalArea * config.adhesiveRate * safetyMargin;
         const totalBags = Math.ceil(totalAdhesiveKg / config.bagSize);
