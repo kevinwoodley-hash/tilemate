@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="TileMate: Professional Tiling Calculator for estimating floor area, adhesive, and grout requirements.">
+    <title>TileMate - Professional Tiling Calculator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="logo">
+                <!-- Simple Tiler Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 3h18v18H3z" />
+                    <path d="M3 9h18" />
+                    <path d="M9 21V9" />
+                </svg>
+                <h1>TileMate</h1>
+            </div>
+            <button id="settings-toggle" class="icon-btn" aria-label="Settings">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                    </path>
+                </svg>
+            </button>
+        </header>
+
+        <main>
+            <!-- Settings Panel -->
+            <section id="settings-panel" class="settings-panel hidden">
+                <div class="settings-header">
+                    <h2>Project Settings</h2>
+                    <button id="close-settings" class="close-btn">&times;</button>
+                </div>
+
+                <div class="form-group">
+                    <label>Theme</label>
+                    <select id="theme-select">
+                        <option value="default">Premium Dark (Default)</option>
+                        <option value="light">Professional Light</option>
+                        <option value="blueprint">Architect Blueprint</option>
+                        <option value="high-vis">High-Vis (Site Mode)</option>
+                    </select>
+                </div>
+
+                <div class="divider"></div>
+
+                <h3>Tile Calculator</h3>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Area per Box (m²)</label>
+                        <input type="number" id="box-area" value="1.44" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Wastage %</label>
+                        <input type="number" id="wastage-percent" value="10">
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <h3>Adhesive & Grout</h3>
+                <div class="form-group">
+                    <label>Trowel Size</label>
+                    <select id="trowel-size">
+                        <option value="3.5">6mm Trowel (~3.5kg/m²)</option>
+                        <option value="4.5" selected>10mm Trowel (~4.5kg/m²)</option>
+                        <option value="6.0">12mm Trowel (~6kg/m²)</option>
+                        <option value="8.0">20mm/Pour (~8kg/m²)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Bag Size (kg)</label>
+                    <input type="number" id="adhesive-bag-size" value="20">
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Tile Length (mm)</label>
+                        <input type="number" id="tile-length" value="600">
+                    </div>
+                    <div class="form-group">
+                        <label>Tile Width (mm)</label>
+                        <input type="number" id="tile-width" value="300">
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Thickness (mm)</label>
+                        <input type="number" id="tile-thickness" value="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Joint Width (mm)</label>
+                        <input type="number" id="joint-width" value="3">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Room List -->
+            <div id="rooms-container" class="rooms-container">
+                <!-- Room Cards injected here -->
+            </div>
+
+            <div class="actions">
+                <button id="add-room-btn" class="btn secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Add Room
+                </button>
+                <button id="calculate-btn" class="btn primary">
+                    Calculate Totals
+                </button>
+            </div>
+        </main>
+
+        <footer class="summary-footer hidden" id="summary-footer">
+            <div class="summary-card">
+                <div class="total-area-row">
+                    <span class="label">TOTAL AREA</span>
+                    <span class="value" id="total-area">0.00 m²</span>
+                </div>
+                <div class="materials-row">
+                    <div class="mat-item">
+                        <span class="mat-label">Adhesive</span>
+                        <div class="mat-val">
+                            <strong id="total-adhesive">0 kg</strong>
+                            <small id="adhesive-bags">0 bags</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="materials-row">
+                    <div class="mat-item">
+                        <span class="mat-label">Grout</span>
+                        <div class="mat-val">
+                            <strong id="total-grout">0.0 kg</strong>
+                        </div>
+                    </div>
+                </div>
+                <!-- Substrates Summary -->
+                <div class="substrates-row hidden" id="substrates-summary">
+                    <div class="sub-item" id="summary-board">
+                        <span>XP Pro Board:</span> <strong id="total-board">0 m²</strong> <small id="count-board"
+                            class="qty-tag"></small>
+                    </div>
+                    <div class="sub-item" id="summary-membrane">
+                        <span>Membrane:</span> <strong id="total-membrane">0 m²</strong> <small id="count-membrane"
+                            class="qty-tag"></small>
+                    </div>
+                    <div class="sub-item" id="summary-tanking">
+                        <span>Tanking:</span> <strong id="total-tanking">0 m²</strong> <small id="count-tanking"
+                            class="qty-tag"></small>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Template for Room Card -->
+    <template id="room-template">
+        <div class="room-card slide-in">
+            <div class="room-header-row">
+                <input type="text" class="room-name-input" placeholder="Room Name" value="Room 1">
+                <button class="remove-room-btn" title="Remove Room">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18" />
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Type Toggle -->
+            <div class="type-section">
+                <div class="type-toggle">
+                    <label class="type-option">
+                        <input type="radio" name="room-type-UUID" value="floor" checked class="type-radio">
+                        <span class="type-label">Floor</span>
+                    </label>
+                    <label class="type-option">
+                        <input type="radio" name="room-type-UUID" value="wall" class="type-radio">
+                        <span class="type-label">Wall</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Dynamic Measurements List -->
+            <div class="area-list">
+                <!-- Measurement Rows injected here via JS -->
+            </div>
+
+            <button class="btn-text add-area-row-btn">+ Add Area</button>
+            <button class="btn primary full-width calculate-room-btn">Calculate</button>
+
+            <!-- Hide per-room total calc if we only want global totals at end? 
+                 User said "only show total area once all rooms/areas have been added".
+                 Implies global total. But room feedback is useful. 
+                 I'll hide the instant feedback per room too to be safe, or just keep it subtle.
+                 Let's keep Room Total visible as it builds confidence, but hide Global Footer. 
+            -->
+            <div class="room-footer">
+                <span class="calc-result">Room Area: <strong class="room-area-val">0.00</strong> m²</span>
+            </div>
+        </div>
+    </template>
+
+    <!-- Template for a Single Measurement Row -->
+    <template id="area-row-template">
+        <div class="area-row-wrapper slide-in-row">
+            <div class="area-inputs">
+                <div class="input-wrapper compact">
+                    <input type="number" class="dim-input length" placeholder="0" step="0.01">
+                    <span class="unit">m</span>
+                    <label>Len</label>
+                </div>
+                <span class="x-icon">×</span>
+                <div class="input-wrapper compact">
+                    <input type="number" class="dim-input width" placeholder="0" step="0.01">
+                    <span class="unit">m</span>
+                    <label>Wid</label>
+                </div>
+                <button class="remove-row-btn" title="Remove Area">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Granular Options -->
+            <div class="row-options">
+                <!-- Floor Options -->
+                <div class="opt-group gr-floor">
+                    <label class="checkbox-container small">
+                        <input type="checkbox" class="sub-check opt-board">
+                        <span class="checkmark small"></span>
+                        XP Board
+                    </label>
+                    <label class="checkbox-container small">
+                        <input type="checkbox" class="sub-check opt-membrane">
+                        <span class="checkmark small"></span>
+                        Membrane
+                    </label>
+                </div>
+                <!-- Wall Options -->
+                <div class="opt-group gr-wall hidden">
+                    <label class="checkbox-container small">
+                        <input type="checkbox" class="sub-check opt-tanking">
+                        <span class="checkmark small"></span>
+                        Tanking
+                    </label>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
