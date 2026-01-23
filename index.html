@@ -102,15 +102,22 @@
 
                 <div class="divider"></div>
 
-                <h3>Tile Calculator</h3>
+                <h3>Labour Pricing</h3>
+                <div class="form-group">
+                    <label>Pricing Method</label>
+                    <select id="pricing-method">
+                        <option value="day-rate">Day Rate</option>
+                        <option value="per-m2">Per m²</option>
+                    </select>
+                </div>
                 <div class="grid-2">
                     <div class="form-group">
-                        <label>Area per Box (m²)</label>
-                        <input type="number" id="box-area" value="1.44" step="0.01">
+                        <label>Day Rate (£)</label>
+                        <input type="number" id="day-rate" value="250" step="10">
                     </div>
                     <div class="form-group">
-                        <label>Wastage %</label>
-                        <input type="number" id="wastage-percent" value="10">
+                        <label>Rate per m² (£)</label>
+                        <input type="number" id="rate-per-m2" value="50" step="5">
                     </div>
                 </div>
 
@@ -285,6 +292,7 @@
         <div class="room-card slide-in">
             <div class="room-header-row">
                 <input type="text" class="room-name-input" placeholder="Room Name" value="Room 1">
+                <input type="number" class="override-area-input" placeholder="Override m²" min="0" step="0.01">
                 <button class="remove-room-btn" title="Remove Room">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

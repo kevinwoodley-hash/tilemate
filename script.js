@@ -240,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
             r.name = `room-type-${uniqueId}`;
         });
 
-        roomsContainer.appendChild(card);
+        roomsContainer.insertBefore(card, roomsContainer.firstChild);
         addMeasurementRow(card);
     }
 
@@ -257,11 +257,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const len = parseFloat(row.querySelector('.length').value) || 0;
             const wid = parseFloat(row.querySelector('.width').value) || 0;
             area += (len * wid);
-
             // Store area on the row for substrate calc (optional, but convenient)
             row.dataset.rowArea = (len * wid);
         });
-
+        // Check for manual override input
+        const overrideInput = card.querySelector('.override-area-input');
+        if (overrideInput && overrideInput.value) {
+            const manual = parseFloat(overrideInput.value);
+            if (!isNaN(manual) && manual > 0) {
+                area = manual;
+            }
+        }
         card.querySelector('.room-area-val').textContent = area.toFixed(2);
         card.dataset.area = area;
     }
@@ -299,16 +305,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Total Area
         totalAreaEl.textContent = totalArea.toFixed(2) + ' m²';
 
-        // 2. Tile Boxes (with wastage)
-        const boxArea = parseFloat(boxAreaInput.value) || 1.44;
-        const wastagePercent = parseFloat(wastageInput.value) || 10;
-        const wastageMultiplier = 1 + (wastagePercent / 100);
-        const tilesNeeded = totalArea * wastageMultiplier;
-        const boxesNeeded = Math.ceil(tilesNeeded / boxArea);
-
-        document.getElementById('total-boxes').textContent = boxesNeeded + ' Boxes';
-        document.getElementById('total-tiles-area').textContent = tilesNeeded.toFixed(2) + ' m²';
-        document.getElementById('box-count-detail').textContent = wastagePercent + '% waste';
+        // 2. Tile Boxes (hidden as per user request)
+        const boxesRow = document.querySelector('.total-area-row.highlight-row');
+        if (boxesRow) {
+            boxesRow.classList.add('hidden');
+        }
 
         // 3. Adhesive (Weight + Bags)
         const safetyMargin = 1.10;
@@ -638,7 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function searchAddress(query) {
         // Use Nominatim API (OpenStreetMap)
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`;
+        const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=gb&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`;
 
         fetch(url, {
             headers: {
