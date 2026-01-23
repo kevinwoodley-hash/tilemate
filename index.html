@@ -1,394 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description"
-        content="TileMate: Professional Tiling Calculator for estimating floor area, adhesive, and grout requirements.">
-    <title>TileMate - Professional Tiling Calculator</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TilerMate – Estimate & Quote</title>
+  <meta name="description" content="Premium web app for tilers to calculate material requirements and generate shareable quotes." />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Google Drive API client library -->
+  <script src="https://apis.google.com/js/api.js"></script>
+  <!-- html2pdf library for PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
-
 <body>
-    <div class="app-container">
-        <header class="app-header">
-            <div class="logo">
-                <!-- Simple Tiler Icon -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 3h18v18H3z" />
-                    <path d="M3 9h18" />
-                    <path d="M9 21V9" />
-                </svg>
-                <h1>TileMate</h1>
-            </div>
-            <button id="settings-toggle" class="icon-btn" aria-label="Settings">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path
-                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-                    </path>
-                </svg>
-            </button>
-        </header>
+  <header class="header">
+    <h1>TilerMate</h1>
+  </header>
 
-        <main>
-            <!-- Customer Details Section -->
-            <section id="customer-section" class="customer-section">
-                <div class="customer-header" id="customer-header">
-                    <div class="customer-title">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                        <h3>Customer Details</h3>
-                        <span class="customer-badge hidden" id="customer-badge">✓</span>
-                    </div>
-                    <button class="toggle-icon" id="customer-toggle" aria-label="Toggle Customer Details">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </button>
-                </div>
-                <div class="customer-content" id="customer-content">
-                    <div class="form-group">
-                        <label>Customer Name</label>
-                        <input type="text" id="customer-name" placeholder="Enter customer name">
-                    </div>
-                    <div class="form-group">
-                        <label>Address</label>
-                        <div class="address-autocomplete-wrapper">
-                            <textarea id="customer-address" rows="2" placeholder="Start typing address..."></textarea>
-                            <div id="address-suggestions" class="address-suggestions hidden"></div>
-                        </div>
-                    </div>
-                    <div class="grid-2">
-                        <div class="form-group">
-                            <label>Phone Number</label>
-                            <input type="tel" id="customer-phone" placeholder="e.g., 07123 456789">
-                        </div>
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" id="customer-email" placeholder="customer@email.com">
-                        </div>
-                    </div>
-                    <button id="clear-customer-btn" class="btn-text clear-btn">Clear Customer Details</button>
-                </div>
-            </section>
-
-            <!-- Settings Panel -->
-            <section id="settings-panel" class="settings-panel hidden">
-                <div class="settings-header">
-                    <h2>Project Settings</h2>
-                    <button id="close-settings" class="close-btn">&times;</button>
-                </div>
-
-                <div class="form-group">
-                    <label>Theme</label>
-                    <select id="theme-select">
-                        <option value="default">Premium Dark (Default)</option>
-                        <option value="light">Professional Light</option>
-                        <option value="blueprint">Architect Blueprint</option>
-                        <option value="high-vis">High-Vis (Site Mode)</option>
-                    </select>
-                </div>
-
-                <div class="divider"></div>
-
-                <h3>Labour Pricing</h3>
-                <div class="form-group">
-                    <label>Pricing Method</label>
-                    <select id="pricing-method">
-                        <option value="day-rate">Day Rate</option>
-                        <option value="per-m2">Per m²</option>
-                    </select>
-                </div>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Day Rate (£)</label>
-                        <input type="number" id="day-rate" value="250" step="10">
-                    </div>
-                    <div class="form-group">
-                        <label>Rate per m² (£)</label>
-                        <input type="number" id="rate-per-m2" value="50" step="5">
-                    </div>
-                </div>
-
-                <div class="divider"></div>
-
-                <h3>Adhesive & Grout</h3>
-                <div class="form-group">
-                    <label>Trowel Size</label>
-                    <select id="trowel-size">
-                        <option value="3.5">6mm Trowel (~3.5kg/m²)</option>
-                        <option value="4.5" selected>10mm Trowel (~4.5kg/m²)</option>
-                        <option value="6.0">12mm Trowel (~6kg/m²)</option>
-                        <option value="8.0">20mm/Pour (~8kg/m²)</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Bag Size (kg)</label>
-                    <input type="number" id="adhesive-bag-size" value="20">
-                </div>
-
-                <div class="divider"></div>
-
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Tile Length (mm)</label>
-                        <input type="number" id="tile-length" value="600">
-                    </div>
-                    <div class="form-group">
-                        <label>Tile Width (mm)</label>
-                        <input type="number" id="tile-width" value="300">
-                    </div>
-                </div>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Thickness (mm)</label>
-                        <input type="number" id="tile-thickness" value="10">
-                    </div>
-                    <div class="form-group">
-                        <label>Joint Width (mm)</label>
-                        <input type="number" id="joint-width" value="3">
-                    </div>
-                </div>
-            </section>
-
-            <!-- Room List -->
-            <div id="rooms-container" class="rooms-container">
-                <!-- Room Cards injected here -->
-            </div>
-
-            <div class="actions">
-                <button id="add-room-btn" class="btn secondary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    Add Room
-                </button>
-                <button id="calculate-btn" class="btn primary">
-                    Calculate Totals
-                </button>
-            </div>
-        </main>
-
-        <footer class="summary-footer hidden" id="summary-footer">
-            <div class="summary-card">
-                <!-- Customer Details Display -->
-                <div class="customer-summary hidden" id="customer-summary">
-                    <div class="customer-summary-header">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                        <strong id="customer-summary-name"></strong>
-                    </div>
-                    <div class="customer-summary-details">
-                        <div id="customer-summary-address"></div>
-                        <div class="customer-summary-contact">
-                            <span id="customer-summary-phone"></span>
-                            <span id="customer-summary-email"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="total-area-row">
-                    <span class="label">TOTAL AREA</span>
-                    <span class="value" id="total-area">0.00 m²</span>
-                </div>
-
-                <!-- Tile Boxes Summary -->
-                <div class="total-area-row highlight-row">
-                    <span class="label">TILES NEEDED (<span id="box-count-detail">10% waste</span>)</span>
-                    <div class="value-group">
-                        <span class="value boxes-val" id="total-boxes">0 Boxes</span>
-                        <small id="total-tiles-area" class="sub-val">0 m²</small>
-                    </div>
-                </div>
-
-                <div class="materials-row">
-                    <div class="mat-item">
-                        <span class="mat-label">Adhesive</span>
-                        <div class="mat-val">
-                            <strong id="total-adhesive">0 kg</strong>
-                            <small id="adhesive-bags">0 bags</small>
-                        </div>
-                    </div>
-                    <div class="mat-item">
-                        <span class="mat-label">Grout</span>
-                        <div class="mat-val">
-                            <strong id="total-grout">0.0 kg</strong>
-                        </div>
-                    </div>
-                </div>
-                <!-- Substrates Summary -->
-                <div class="substrates-row hidden" id="substrates-summary">
-                    <div class="sub-item" id="summary-board">
-                        <span>XP Pro Board:</span> <strong id="total-board">0 m²</strong> <small id="count-board"
-                            class="qty-tag"></small>
-                    </div>
-                    <div class="sub-item" id="summary-membrane">
-                        <span>Membrane:</span> <strong id="total-membrane">0 m²</strong> <small id="count-membrane"
-                            class="qty-tag"></small>
-                    </div>
-                    <div class="sub-item" id="summary-tanking">
-                        <span>Tanking:</span> <strong id="total-tanking">0 m²</strong> <small id="count-tanking"
-                            class="qty-tag"></small>
-                    </div>
-                </div>
-
-                <!-- Share Buttons -->
-                <div class="share-section">
-                    <div class="share-label">Share Quote:</div>
-                    <div class="share-buttons">
-                        <button id="share-whatsapp" class="share-btn whatsapp" title="Share via WhatsApp">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                fill="currentColor">
-                                <path
-                                    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-                            </svg>
-                            WhatsApp
-                        </button>
-                        <button id="share-email" class="share-btn email" title="Share via Email">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
-                                </path>
-                                <polyline points="22,6 12,13 2,6"></polyline>
-                            </svg>
-                            Email
-                        </button>
-                        <button id="share-copy" class="share-btn copy" title="Copy to Clipboard">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                            </svg>
-                            Copy
-                        </button>
-                    </div>
-                    <div id="copy-feedback" class="copy-feedback hidden">✓ Copied to clipboard!</div>
-                </div>
-            </div>
-        </footer>
-    </div>
-
-    <!-- Template for Room Card -->
-    <template id="room-template">
-        <div class="room-card slide-in">
-            <div class="room-header-row">
-                <input type="text" class="room-name-input" placeholder="Room Name" value="Room 1">
-                <input type="number" class="override-area-input" placeholder="Override m²" min="0" step="0.01">
-                <button class="remove-room-btn" title="Remove Room">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 6h18" />
-                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Type Toggle -->
-            <div class="type-section">
-                <div class="type-toggle">
-                    <label class="type-option">
-                        <input type="radio" name="room-type-UUID" value="floor" checked class="type-radio">
-                        <span class="type-label">Floor</span>
-                    </label>
-                    <label class="type-option">
-                        <input type="radio" name="room-type-UUID" value="wall" class="type-radio">
-                        <span class="type-label">Wall</span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Dynamic Measurements List -->
-            <div class="area-list">
-                <!-- Measurement Rows injected here via JS -->
-            </div>
-
-            <button class="btn-text add-area-row-btn">+ Add Area</button>
-            <button class="btn primary full-width calculate-room-btn">Calculate</button>
-
-            <!-- Hide per-room total calc if we only want global totals at end? 
-                 User said "only show total area once all rooms/areas have been added".
-                 Implies global total. But room feedback is useful. 
-                 I'll hide the instant feedback per room too to be safe, or just keep it subtle.
-                 Let's keep Room Total visible as it builds confidence, but hide Global Footer. 
-            -->
-            <div class="room-footer">
-                <span class="calc-result">Room Area: <strong class="room-area-val">0.00</strong> m²</span>
-            </div>
+  <main class="container">
+    <section id="input-section" class="card">
+      <h2>Job Details</h2>
+      <form id="job-form">
+        <div class="form-group">
+          <label for="customer-name">Customer Name</label>
+          <input type="text" id="customer-name" required />
         </div>
-    </template>
-
-    <!-- Template for a Single Measurement Row -->
-    <template id="area-row-template">
-        <div class="area-row-wrapper slide-in-row">
-            <div class="area-inputs">
-                <div class="input-wrapper compact">
-                    <input type="number" class="dim-input length" placeholder="0" step="0.01">
-                    <span class="unit">m</span>
-                    <label>Len</label>
-                </div>
-                <span class="x-icon">×</span>
-                <div class="input-wrapper compact">
-                    <input type="number" class="dim-input width" placeholder="0" step="0.01">
-                    <span class="unit">m</span>
-                    <label>Wid</label>
-                </div>
-                <button class="remove-row-btn" title="Remove Area">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Granular Options -->
-            <div class="row-options">
-                <!-- Floor Options -->
-                <div class="opt-group gr-floor">
-                    <label class="checkbox-container small">
-                        <input type="checkbox" class="sub-check opt-board">
-                        <span class="checkmark small"></span>
-                        XP Board
-                    </label>
-                    <label class="checkbox-container small">
-                        <input type="checkbox" class="sub-check opt-membrane">
-                        <span class="checkmark small"></span>
-                        Membrane
-                    </label>
-                </div>
-                <!-- Wall Options -->
-                <div class="opt-group gr-wall hidden">
-                    <label class="checkbox-container small">
-                        <input type="checkbox" class="sub-check opt-tanking">
-                        <span class="checkmark small"></span>
-                        Tanking
-                    </label>
-                </div>
-            </div>
+        <div class="form-group">
+          <label for="customer-email">Email</label>
+          <input type="email" id="customer-email" required />
         </div>
-    </template>
+        <div class="rooms-container" id="rooms-container">
+          <!-- Rooms will be added dynamically -->
+        </div>
+        <button type="button" id="add-room-btn" class="btn-primary">Add Room</button>
+        <button type="submit" class="btn-primary">Generate Quote</button>
+      </form>
+    </section>
 
-    <script src="script.js"></script>
+    <section id="quote-section" class="card hidden">
+      <h2>Quote</h2>
+      <div id="quote-content"></div>
+      <div class="actions">
+        <button id="save-drive-btn" class="btn-secondary">Save to Google Drive</button>
+        <button id="copy-quote-btn" class="btn-secondary">Copy to Clipboard</button>
+        <button id="share-email-btn" class="btn-secondary">Share via Email</button>
+        <button id="share-whatsapp-btn" class="btn-secondary">Share via WhatsApp</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="utils.js"></script>
+  <script src="drive.js"></script>
+  <script src="app.js"></script>
 </body>
-
 </html>
